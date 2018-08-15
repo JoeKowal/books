@@ -1,5 +1,5 @@
 import React from 'react'
-// import * as BooksAPI from './BooksAPI'
+//import * as BooksAPI from './BooksAPI'
 import './App.css'
 
 class BooksApp extends React.Component {
@@ -40,7 +40,7 @@ class BooksApp extends React.Component {
         ) : (
           <div className="list-books">
             <div className="list-books-title">
-              <h1>MyReads</h1>
+              <h1>My Books</h1>
             </div>
             <div className="list-books-content">
               <div>
@@ -57,7 +57,7 @@ class BooksApp extends React.Component {
                                 <option value="move" disabled>Move to...</option>
                                 <option value="currentlyReading">Currently Reading</option>
                                 <option value="wantToRead">Want to Read</option>
-                                <option value="read">Read</option>
+                                <option value="read">Already Read</option>
                                 <option value="none">None</option>
                               </select>
                             </div>
