@@ -1,49 +1,64 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import React from "react";
+import * as BooksAPI from "./BooksAPI";
+import BookShelf from "./BookShelf";
 import { Link } from "react-router-dom";
-import { Debounce } from "react-throttle";
-import Book from "./Book";
-
-class Search extends Component {
-  static propTypes = {
-    books: PropTypes.array.isRequired,
-    moveShelf: PropTypes.func.isRequired
+class Search extends React.Component {
+  state = {
+    query: "",
+    booksFound: []
   };
 
-  updateQuery = query => {
-    this.props.updateQuery(query.trim());
-  };
+  handleChange(event) {
+    const newQuery = event.target.value;
+    if (newQuery) {
+      this.setState({ query: newQuery });
 
-  componentWillUnmount() {
-    // Reset search
-    this.props.updateQuery("");
+      BooksAPI.search(newQuery, 20).then(books => {
+        books.length > 0
+          ? this.setState({ booksFound: books })
+          : this.setState({ booksFound: [] });
+      });
+    } else {
+      this.setState({
+        booksFound: [],
+        query: ""
+      });
+    }
   }
-
   render() {
+    const { changeShelf, getShelfName } = this.props;
+    const { query, booksFound } = this.state;
     return (
-      <div className="search-books">
-        <div className="search-books-bar">
-          <Link className="close-search" to="/">
-            Close Search
-          </Link>
-          <div className="search-books-input-wrapper">
-            <Debounce time="725" handler="onChange">
+      <div>
+        <div className="search-books">
+          <div className="search-books-bar">
+            <Link className="close-search" to="/">
+              Close
+            </Link>
+            <div className="search-books-input-wrapper">
               <input
                 type="text"
-                placeholder="Search by Title or Author"
-                onChange={event => this.updateQuery(event.target.value)}
+                placeholder="Search by title or author"
+                value={query}
+                onChange={event => this.handleChange(event)}
               />
-            </Debounce>
+            </div>
           </div>
-        </div>
-        <div className="search-books-results">
-          <ol className="books-grid">
-            {this.props.books.map(book => (
-              <li key={book.id} className="contact-list-item">
-                <Book book={book} moveShelf={this.props.moveShelf} />
-              </li>
-            ))}
-          </ol>
+          <div className="search-books-results">
+            <BookShelf
+              bookShelfName={""}
+              bookList={booksFound}
+              key={query}
+              changeShelf={changeShelf}
+              getShelfName={getShelfName}
+            />
+            {booksFound.length === 0 &&
+              query !== "" && (
+                <div className="">
+                  <h3>No books were found. Try another search ...</h3>
+                </div>
+              )}
+          </div>
         </div>
       </div>
     );

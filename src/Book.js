@@ -1,26 +1,36 @@
-import React, { Component } from "react";
+import React from "react";
+import BookChanger from "./BookChanger";
 import PropTypes from "prop-types";
-import MoveShelf from "./MoveShelf";
-
-class Book extends Component {
+class Book extends React.Component {
   static propTypes = {
-    book: PropTypes.object.isRequired,
-    moveShelf: PropTypes.func.isRequired
+    bookObj: PropTypes.object.isRequired,
+    changeShelf: PropTypes.func.isRequired,
+    getShelfName: PropTypes.func.isRequired
   };
-
   render() {
-    const { book } = this.props;
+    const { changeShelf, getShelfName, bookObj } = this.props;
+    const thumbNail = bookObj.imageLinks && bookObj.imageLinks.thumbnail;
+    const bookTitle = bookObj.title;
+    const authorList = bookObj.authors;
     return (
-      <div className="book" id={book.id}>
+      <div className="book">
         <div className="book-top">
           <div
             className="book-cover"
-            style={{ backgroundImage: `url("${book.imageLinks.thumbnail}")` }}
+            style={{
+              width: 128,
+              height: 193,
+              backgroundImage: `url(${thumbNail})`
+            }}
           />
-          <MoveShelf book={book} moveShelf={this.props.moveShelf} />
+          <BookChanger
+            bookObj={bookObj}
+            changeShelf={changeShelf}
+            getShelfName={getShelfName}
+          />
         </div>
-        <div className="book-title">{book.name}</div>
-        <div className="book-authors">{book.authors}</div>
+        <div className="book-title">{bookTitle}</div>
+        <div className="book-authors">{authorList}</div>
       </div>
     );
   }

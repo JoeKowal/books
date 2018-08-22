@@ -1,114 +1,87 @@
 import React from "react";
-import { Link, Route } from "react-router-dom";
-import * as BooksAPI from "./BooksAPI";
-import Shelf from "./Shelf";
-import Search from "./Search";
 import "./App.css";
+import Search from "./Search";
+import MainBookScreen from "./MainBookScreen";
+import * as BooksAPI from "./BooksAPI";
+import { Route, Link, BrowserRouter as Router } from "react-router-dom";
 
 class BooksApp extends React.Component {
-  MAX_RESULTS = 30;
-
   state = {
-    books: [],
-    searchBooks: []
+    books: []
   };
+
+  changeShelf(book, shelf) {
+    BooksAPI.update(book, shelf).then(respond => {
+      // update the local version of books to change shelf
+      book.shelf = shelf;
+
+      // get array of books
+      var bookArray = this.state.books.filter(
+        currBook => currBook.id !== book.id
+      );
+
+      // add the new book
+      bookArray.push(book);
+
+      this.setState({
+        books: bookArray
+      });
+    });
+  }
 
   componentDidMount() {
-    this.fetchBooks();
-  }
-
-  fetchBooks() {
     BooksAPI.getAll().then(books => {
-      this.setState({ books });
-    });
-  }
-
-  getShelfBooks(shelfName) {
-    return this.state.books.filter(b => b.shelf === shelfName);
-  }
-
-  changeShelf = (book, newShelf) => {
-    BooksAPI.update(book, newShelf).then(() => {
-      //local copy of book
-      book.shelf = newShelf;
-
-      //filter book and append
-      this.setState(state => ({
-        books: state.books.filter(b => b.id !== book.id).concat([book])
+      this.setState(() => ({
+        books
       }));
     });
-  };
+  }
 
-  updateQuery = query => {
-    if (query) {
-      BooksAPI.search(query, this.MAX_RESULTS).then(books => {
-        if (books.length) {
-          books.forEach((book, index) => {
-            let myBook = this.state.books.find(b => b.id === book.id);
-            book.shelf = myBook ? myBook.shelf : "none";
-            books[index] = book;
-          });
+  getShelfName(bookId) {
+    var bookArray = this.state.books.filter(book => book.id === bookId);
 
-          this.setState({
-            searchBooks: books
-          });
-        }
-      });
+    if (bookArray.length === 0) {
+      return "none";
+    } else if (bookArray.length === 1) {
+      return bookArray[0].shelf;
     } else {
-      this.setState({
-        searchBooks: []
-      });
+      throw new Error("App.js more than one book");
     }
-  };
+  }
 
   render() {
+    const { books } = this.state;
     return (
-      <div className="app">
-        <Route
-          exact
-          path="/"
-          render={() => (
-            <div className="list-books">
-              <div className="list-books-title">
-                <h1>My Books</h1>
-              </div>
-              <div className="list-books-content">
-                <div>
-                  <Shelf
-                    title="Currently Reading"
-                    books={this.getShelfBooks("currentlyReading")}
-                    changeShelf={this.changeShelf}
-                  />
-                  <Shelf
-                    title="Want to Read"
-                    books={this.getShelfBooks("wantToRead")}
-                    changeShelf={this.changeShelf}
-                  />
-                  <Shelf
-                    title="Have Read"
-                    books={this.getShelfBooks("read")}
-                    changeShelf={this.changeShelf}
-                  />
-                </div>
-              </div>
-              <div className="open-search">
-                <Link to="/search">Add a book</Link>
-              </div>
-            </div>
-          )}
-        />
+      <Router>
+        <div>
+          <Route
+            exact
+            path="/search"
+            render={() => (
+              <Search
+                changeShelf={this.changeShelf.bind(this)}
+                getShelfName={this.getShelfName.bind(this)}
+              />
+            )}
+          />
 
-        <Route
-          path="/search"
-          render={({ history }) => (
-            <Search
-              books={this.state.searchBooks}
-              updateQuery={this.updateQuery}
-              changeShelf={this.changeShelf}
-            />
-          )}
-        />
-      </div>
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <MainBookScreen
+                books={books}
+                changeShelf={this.changeShelf.bind(this)}
+                getShelfName={this.getShelfName.bind(this)}
+              />
+            )}
+          />
+
+          <div className="open-search">
+            <Link to="/search">Search for New Books</Link>
+          </div>
+        </div>
+      </Router>
     );
   }
 }
