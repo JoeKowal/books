@@ -28,3 +28,13 @@ The backend API uses a fixed set of cached search results and is limited to a pa
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app). You can find more information on how to perform common tasks [here](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md)
 
 
+## Dependencies
+
+react: 16.4.2,
+    react-debounce-input: 3.2.0,
+    react-dom: 16.4.2,
+    react-router: 4.3.1,
+    react-router-dom: 4.3.1,
+    react-scripts: 1.1.4,
+    react-throttle: 0.3.0
+
